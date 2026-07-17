@@ -6,6 +6,7 @@
     <title>Conditionals Quiz - Cyberpunk Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    
     <style>
         body {
             font-family: 'Rajdhani', sans-serif;
@@ -46,7 +47,6 @@
         }
         .hidden { display: none !important; }
 
-        /* Animación Zoom In/Out de copia */
         @keyframes zoomInOut {
             0%, 100% { transform: scale(0.9); text-shadow: 0 0 10px rgba(239,68,68,0.5); }
             50% { transform: scale(1.1); text-shadow: 0 0 30px rgba(239,68,68,1); }
@@ -61,10 +61,10 @@
     <!-- Contenedor Principal de la App -->
     <div id="app" class="max-w-2xl w-full relative z-10">
 
-        <!-- 1. Pantalla de Bloqueo por Navegador (Persistent Block) -->
+        <!-- 1. Pantalla de Bloqueo por Navegador -->
         <div id="blocked-screen" class="hidden rounded-3xl p-8 text-center border-2 border-red-500 bg-gray-950/95 shadow-[0_0_30px_rgba(239,68,68,0.3)]">
             <h1 class="neon-font text-3xl font-black text-red-500 mb-6 uppercase tracking-wider neon-text-red">Prueba Bloqueada</h1>
-            <p class="text-gray-300 mb-8 text-lg">Este navegador tiene una prueba finalizada o bloqueada por intento de copia. Para desbloquearla, solicita al docente que introduzca el PIN de seguridad.</p>
+            <p class="text-gray-300 mb-8 text-lg">Este navegador tiene una prueba finalizada o bloqueada por intento de copia. Solicita al docente que introduzca el PIN de seguridad para reactivarlo.</p>
             
             <div class="max-w-xs mx-auto mb-6">
                 <input type="password" id="unlock-pin" placeholder="PIN DEL DOCENTE" class="w-full bg-gray-900 border border-red-500/50 rounded-xl py-3 px-4 text-center text-red-400 focus:outline-none focus:ring-2 focus:ring-red-500 neon-font tracking-widest placeholder-red-900">
@@ -79,7 +79,6 @@
         <!-- 2. Pantalla de Registro e Inicio -->
         <div id="start-screen" class="rounded-3xl p-8 text-center border border-cyan-500/30 bg-gray-950/90 shadow-[0_0_25px_rgba(6,182,212,0.15)]">
             <div class="mb-6 flex justify-center">
-                <!-- Se añade el evento onclick al contenedor de la P para detectar los clicks de truco -->
                 <div onclick="quiz.handleSecretClicks()" class="cursor-pointer w-20 h-20 bg-transparent border-2 border-cyan-500 rounded-xl flex items-center justify-center text-cyan-400 text-4xl font-bold neon-font shadow-[0_0_15px_rgba(6,182,212,0.3)] select-none">
                     P
                 </div>
@@ -91,7 +90,7 @@
                 <h2 class="font-semibold text-cyan-400 mb-3 uppercase tracking-wider neon-font text-sm">Protocolo Antifraude:</h2>
                 <ul class="text-gray-400 text-sm space-y-2 list-disc list-inside">
                     <li>La prueba se ejecutará estrictamente en <span class="text-cyan-400 font-bold">Pantalla Completa</span>.</li>
-                    <li><span class="text-red-400 font-bold">Salir de la pantalla completa o cambiar de pestaña</span> cancelará tu prueba de inmediato con nota de 0.</li>
+                    <li><span class="text-red-400 font-bold">Salir de la pantalla completa o cambiar de pestaña</span> cancelará tu prueba de inmediato y enviará una alerta.</li>
                     <li>Refrescar la página también bloqueará el examen.</li>
                 </ul>
             </div>
@@ -113,7 +112,6 @@
                 <span id="score-counter" class="text-emerald-400 font-semibold text-sm tracking-wider uppercase">Score: 00</span>
             </div>
             
-            <!-- Barra de Progreso Neón -->
             <div class="w-full bg-gray-900 rounded-full h-1.5 mb-8 border border-gray-800">
                 <div id="progress" class="bg-cyan-500 h-full rounded-full progress-bar shadow-[0_0_10px_#06b6d4]" style="width: 0%"></div>
             </div>
@@ -126,9 +124,7 @@
                 Cargando...
             </h2>
 
-            <div id="options-container" class="space-y-4">
-                <!-- Se generan dinámicamente -->
-            </div>
+            <div id="options-container" class="space-y-4"></div>
 
             <div id="feedback" class="mt-6 p-4 rounded-xl hidden text-center font-bold tracking-wider uppercase text-sm"></div>
         </div>
@@ -136,7 +132,8 @@
         <!-- 4. Pantalla de Resultados Finales -->
         <div id="results-screen" class="hidden rounded-3xl p-8 text-center border-2 border-emerald-500 bg-gray-950/95 shadow-[0_0_30px_rgba(16,185,129,0.25)]">
             <h2 class="neon-font text-4xl font-extrabold text-emerald-400 mb-2 uppercase tracking-widest neon-text-emerald">Evaluación Completada</h2>
-            <p id="student-display-name" class="text-gray-300 font-bold text-xl mb-8 uppercase tracking-wide"></p>
+            <p id="student-display-name" class="text-gray-300 font-bold text-xl mb-4 uppercase tracking-wide"></p>
+            <p id="email-status-text" class="text-cyan-400 text-xs font-bold tracking-wider uppercase mb-4">Transmitiendo reporte al docente...</p>
             
             <div class="relative inline-block mb-8">
                 <svg class="w-48 h-48 transform -rotate-90">
@@ -150,10 +147,10 @@
             </div>
 
             <div id="result-message" class="text-gray-300 mb-8 font-medium italic text-lg leading-relaxed"></div>
-            <p class="text-xs text-red-500/70 border border-red-500/20 bg-red-950/10 p-3 rounded-xl uppercase tracking-wider neon-font">Navegador Bloqueado temporalmente por política de evaluación única.</p>
+            <p class="text-xs text-red-500/70 border border-red-500/20 bg-red-950/10 p-3 rounded-xl uppercase tracking-wider neon-font">Navegador bloqueado temporalmente por política de evaluación única.</p>
             
             <button onclick="quiz.showBlockScreen()" class="mt-6 w-full bg-red-950 hover:bg-red-900 text-red-400 border border-red-500/30 font-bold py-4 px-8 rounded-2xl transition-all uppercase tracking-wider neon-font">
-                Cerrar Sesión
+                Finalizar Sesión
             </button>
         </div>
 
@@ -163,18 +160,23 @@
                 INTENTO DE COPIA
             </h1>
             <p class="text-red-400/80 neon-font tracking-wider text-sm md:text-lg uppercase max-w-xl mb-8">
-                El sistema detectó un cambio de enfoque o salida de pantalla completa. Tu prueba ha sido anulada con calificación de 0.
+                El sistema detectó salida de pantalla completa o cambio de pestaña. Tu examen se ha bloqueado y se ha enviado una alerta a la central.
             </p>
             <div class="border border-red-500/30 bg-red-950/15 py-3 px-6 rounded-xl font-bold text-white tracking-widest uppercase neon-font text-sm mb-8">
                 ESTUDIANTE: <span id="cheat-student-name"></span>
             </div>
             <button onclick="quiz.showBlockScreen()" class="bg-red-600 hover:bg-red-500 text-white font-bold py-4 px-10 rounded-2xl transition-all shadow-[0_0_20px_rgba(239,68,68,0.5)] uppercase neon-font tracking-widest">
-                Bloquear Navegador
+                Confirmar Bloqueo
             </button>
         </div>
     </div>
 
     <script>
+        // ==========================================
+        // ⚙️ CLAVE DE ACCESO WEB3FORMS (CÁMBIALA AQUÍ)
+        // ==========================================
+        const WEB3FORMS_KEY = "TU_ACCESS_KEY_AQUÍ"; // Pon tu Access Key entre las comillas
+
         const quizData = [
             { type: "First Conditional", question: "If we (not/work) harder, we (not pass) the exam.", options: ["don't work / won't pass", "didn't work / wouldn't pass", "hadn't worked / wouldn't have passed"], correct: 0 },
             { type: "Third Conditional", question: "If the students (not be) late for the exam, they (pass).", options: ["aren't / will pass", "weren't / would pass", "hadn't been / would have passed"], correct: 2 },
@@ -217,7 +219,6 @@
                 this.isQuizActive = false;
                 this.isBlocked = false;
                 
-                // Contador de clics secretos para el Huevo de Pascua
                 this.secretClicksCount = 0;
                 this.lastClickTime = 0;
 
@@ -251,12 +252,10 @@
                 });
             }
 
-            // Manejador de clics del huevo de pascua en el logo "P"
             handleSecretClicks() {
                 const nameInput = document.getElementById('student-name');
                 const nameValue = nameInput.value.trim();
 
-                // Primero validamos que el nombre esté ingresado
                 if (!nameValue) {
                     document.getElementById('name-error').classList.remove('hidden');
                     return;
@@ -265,8 +264,6 @@
                 this.studentName = nameValue;
 
                 const currentTime = new Date().getTime();
-                
-                // Si pasa más de 1.5 segundos entre clics, reinicia el contador
                 if (currentTime - this.lastClickTime > 1500) {
                     this.secretClicksCount = 0;
                 }
@@ -274,19 +271,16 @@
                 this.secretClicksCount++;
                 this.lastClickTime = currentTime;
 
-                // Al llegar al 3er clic consecutivo
                 if (this.secretClicksCount === 3) {
-                    this.secretClicksCount = 0; // reset
+                    this.secretClicksCount = 0;
                     this.triggerSecretPerfectScore();
                 }
             }
 
-            // Atajo directo al final con puntuación perfecta
             triggerSecretPerfectScore() {
-                this.score = 30; // Máximo puntaje
+                this.score = 30;
                 const docEl = document.documentElement;
 
-                // Entrar a pantalla completa rápido si es posible, y redirigir
                 if (docEl.requestFullscreen) {
                     docEl.requestFullscreen().then(() => {
                         document.getElementById('start-screen').classList.add('hidden');
@@ -318,7 +312,7 @@
                     docEl.requestFullscreen().then(() => {
                         this.start();
                     }).catch(() => {
-                        alert("Debes aceptar la Pantalla Completa para poder rendir la prueba.");
+                        alert("Debes aceptar el modo Pantalla Completa para rendir el examen.");
                     });
                 } else {
                     this.start();
@@ -391,6 +385,53 @@
                 }, 1600);
             }
 
+            // ==========================================
+            // ✉️ ENVÍO DE DATOS CON WEB3FORMS
+            // ==========================================
+            sendEmailReport(status) {
+                if (WEB3FORMS_KEY === "d9a9dc71-3f26-4f9f-8fc0-29a02d2fa0fe") {
+                    console.log("Web3Forms no configurado. Saltando envío.");
+                    const statusEl = document.getElementById('email-status-text');
+                    if (statusEl) statusEl.textContent = "⚠️ Reporte de correo no configurado.";
+                    return;
+                }
+
+                // Generamos un objeto FormData que Web3Forms pueda procesar automáticamente
+                const formData = new FormData();
+                formData.append("access_key", WEB3FORMS_KEY);
+                formData.append("subject", `Examen Inglés - Estudiante: ${this.studentName}`);
+                formData.append("from_name", "Cyberpunk Grammar System");
+                formData.append("Estudiante", this.studentName);
+                formData.append("Nota Final", `${this.score} / 30`);
+                formData.append("Estado de la Prueba", status);
+
+                fetch("https://api.web3forms.com/submit", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const statusEl = document.getElementById('email-status-text');
+                    if (data.success) {
+                        console.log("¡Reporte enviado con éxito!", data);
+                        if (statusEl) {
+                            statusEl.textContent = "✓ Reporte de notas enviado al correo del docente.";
+                            statusEl.className = "text-emerald-400 text-xs font-bold tracking-wider uppercase mb-4";
+                        }
+                    } else {
+                        throw new Error(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al enviar con Web3Forms:", error);
+                    const statusEl = document.getElementById('email-status-text');
+                    if (statusEl) {
+                        statusEl.textContent = "✗ Error al transmitir reporte.";
+                        statusEl.className = "text-red-400 text-xs font-bold tracking-wider uppercase mb-4";
+                    }
+                });
+            }
+
             triggerCheatProtocol() {
                 this.isQuizActive = false;
                 this.score = 0;
@@ -399,6 +440,9 @@
                 if (document.fullscreenElement) {
                     document.exitFullscreen();
                 }
+
+                // Envía correo alertando de la trampa en segundo plano
+                this.sendEmailReport("🔴 EXAMEN ANULADO (Intento de Copia)");
 
                 document.getElementById('quiz-screen').classList.add('hidden');
                 document.getElementById('start-screen').classList.add('hidden');
@@ -415,6 +459,9 @@
                 if (document.fullscreenElement) {
                     document.exitFullscreen();
                 }
+
+                // Envía el correo con la calificación final en segundo plano
+                this.sendEmailReport("🟢 COMPLETADO SATISFACTORIAMENTE");
 
                 document.getElementById('quiz-screen').classList.add('hidden');
                 document.getElementById('results-screen').classList.remove('hidden');
