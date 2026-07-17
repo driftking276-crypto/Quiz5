@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conditionals Quiz - Cyberpunk Edition</title>
+    <title>Conditionals Quiz - Secure Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     
@@ -63,17 +63,22 @@
 
         <!-- 1. Pantalla de Bloqueo por Navegador -->
         <div id="blocked-screen" class="hidden rounded-3xl p-8 text-center border-2 border-red-500 bg-gray-950/95 shadow-[0_0_30px_rgba(239,68,68,0.3)]">
-            <h1 class="neon-font text-3xl font-black text-red-500 mb-6 uppercase tracking-wider neon-text-red">Prueba Bloqueada</h1>
-            <p class="text-gray-300 mb-8 text-lg">Este navegador tiene una prueba finalizada o bloqueada por intento de copia. Solicita al docente que introduzca el PIN de seguridad para reactivarlo.</p>
+            <h1 class="neon-font text-3xl font-black text-red-500 mb-6 uppercase tracking-wider neon-text-red">Sistema Bloqueado</h1>
+            <p class="text-gray-300 mb-8 text-lg">Este navegador tiene una prueba finalizada o bloqueada por intento de copia. Pide asistencia al docente.</p>
             
             <div class="max-w-xs mx-auto mb-6">
                 <input type="password" id="unlock-pin" placeholder="PIN DEL DOCENTE" class="w-full bg-gray-900 border border-red-500/50 rounded-xl py-3 px-4 text-center text-red-400 focus:outline-none focus:ring-2 focus:ring-red-500 neon-font tracking-widest placeholder-red-900">
-                <p id="unlock-error" class="text-red-500 text-sm mt-2 hidden">PIN Incorrecto</p>
+                <p id="unlock-error" class="text-red-500 text-sm mt-2 hidden font-bold">PIN Incorrecto</p>
             </div>
             
-            <button onclick="quiz.unlock()" class="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-[0_0_15px_rgba(239,68,68,0.4)] tracking-wide uppercase">
-                Desbloquear Sistema
-            </button>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="quiz.unlock('reset')" class="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_15px_rgba(239,68,68,0.4)] tracking-wide uppercase text-sm">
+                    Reactivar Prueba
+                </button>
+                <button onclick="quiz.unlock('history')" class="bg-purple-700 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_15px_rgba(168,85,247,0.4)] tracking-wide uppercase text-sm">
+                    Ver Historial de Notas
+                </button>
+            </div>
         </div>
 
         <!-- 2. Pantalla de Registro e Inicio -->
@@ -90,7 +95,7 @@
                 <h2 class="font-semibold text-cyan-400 mb-3 uppercase tracking-wider neon-font text-sm">Protocolo Antifraude:</h2>
                 <ul class="text-gray-400 text-sm space-y-2 list-disc list-inside">
                     <li>La prueba se ejecutará estrictamente en <span class="text-cyan-400 font-bold">Pantalla Completa</span>.</li>
-                    <li><span class="text-red-400 font-bold">Salir de la pantalla completa o cambiar de pestaña</span> cancelará tu prueba de inmediato y enviará una alerta.</li>
+                    <li><span class="text-red-400 font-bold">Salir de la pantalla completa o cambiar de pestaña</span> cancelará tu prueba de inmediato y guardará una alerta.</li>
                     <li>Refrescar la página también bloqueará el examen.</li>
                 </ul>
             </div>
@@ -103,6 +108,13 @@
             <button onclick="quiz.verifyAndStart()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] uppercase tracking-wider neon-font">
                 Iniciar Evaluación
             </button>
+
+            <!-- Acceso Directo para el Docente -->
+            <div class="mt-8 pt-4 border-t border-gray-900">
+                <button onclick="quiz.promptTeacherAccess()" class="text-gray-600 hover:text-purple-400 text-xs transition-all tracking-wider uppercase font-semibold">
+                    🔑 Acceso Docente (Historial)
+                </button>
+            </div>
         </div>
 
         <!-- 3. Pantalla de Preguntas -->
@@ -133,7 +145,7 @@
         <div id="results-screen" class="hidden rounded-3xl p-8 text-center border-2 border-emerald-500 bg-gray-950/95 shadow-[0_0_30px_rgba(16,185,129,0.25)]">
             <h2 class="neon-font text-4xl font-extrabold text-emerald-400 mb-2 uppercase tracking-widest neon-text-emerald">Evaluación Completada</h2>
             <p id="student-display-name" class="text-gray-300 font-bold text-xl mb-4 uppercase tracking-wide"></p>
-            <p id="email-status-text" class="text-cyan-400 text-xs font-bold tracking-wider uppercase mb-4">Transmitiendo reporte al docente...</p>
+            <p class="text-emerald-400 text-xs font-bold tracking-wider uppercase mb-4">✓ Reporte local guardado con éxito.</p>
             
             <div class="relative inline-block mb-8">
                 <svg class="w-48 h-48 transform -rotate-90">
@@ -160,7 +172,7 @@
                 INTENTO DE COPIA
             </h1>
             <p class="text-red-400/80 neon-font tracking-wider text-sm md:text-lg uppercase max-w-xl mb-8">
-                El sistema detectó salida de pantalla completa o cambio de pestaña. Tu examen se ha bloqueado y se ha enviado una alerta a la central.
+                El sistema detectó salida de pantalla completa o cambio de pestaña. Tu examen se ha bloqueado y se ha registrado la novedad.
             </p>
             <div class="border border-red-500/30 bg-red-950/15 py-3 px-6 rounded-xl font-bold text-white tracking-widest uppercase neon-font text-sm mb-8">
                 ESTUDIANTE: <span id="cheat-student-name"></span>
@@ -169,14 +181,41 @@
                 Confirmar Bloqueo
             </button>
         </div>
+
+        <!-- 6. PANEL EXCLUSIVO DEL DOCENTE (Historial de Notas) -->
+        <div id="teacher-panel" class="hidden rounded-3xl p-8 border border-purple-500/40 bg-gray-950/95 shadow-[0_0_25px_rgba(168,85,247,0.3)] max-w-3xl w-full mx-auto">
+            <h2 class="neon-font text-2xl font-black text-purple-400 mb-2 uppercase tracking-wider">Historial de Calificaciones</h2>
+            <p class="text-gray-400 text-sm mb-6">Registro local de estudiantes, notas y novedades de fraude.</p>
+
+            <div class="overflow-x-auto max-h-80 border border-gray-800 rounded-2xl mb-6 bg-gray-900/50">
+                <table class="w-full text-left text-sm text-gray-300">
+                    <thead class="bg-purple-950/50 text-purple-400 uppercase text-xs font-bold tracking-wider">
+                        <tr>
+                            <th class="p-4 border-b border-gray-800">Fecha/Hora</th>
+                            <th class="p-4 border-b border-gray-800">Estudiante</th>
+                            <th class="p-4 border-b border-gray-800">Puntaje</th>
+                            <th class="p-4 border-b border-gray-800">Novedad / Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacher-table-body" class="divide-y divide-gray-900">
+                        <!-- Carga dinámica -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button onclick="quiz.clearHistory()" class="flex-1 bg-red-950 hover:bg-red-900 text-red-400 border border-red-500/20 font-bold py-3 px-6 rounded-xl transition-all uppercase tracking-wider text-xs">
+                    ⚠️ Vaciar Registro Local
+                </button>
+                <button onclick="quiz.closeTeacherPanel()" class="flex-1 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-700 font-bold py-3 px-6 rounded-xl transition-all uppercase tracking-wider text-xs">
+                    Regresar al Inicio
+                </button>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // ==========================================
-        // ⚙️ CLAVE DE ACCESO WEB3FORMS (CÁMBIALA AQUÍ)
-        // ==========================================
-        const WEB3FORMS_KEY = "TU_ACCESS_KEY_AQUÍ"; // Pon tu Access Key entre las comillas
-
         const quizData = [
             { type: "First Conditional", question: "If we (not/work) harder, we (not pass) the exam.", options: ["don't work / won't pass", "didn't work / wouldn't pass", "hadn't worked / wouldn't have passed"], correct: 0 },
             { type: "Third Conditional", question: "If the students (not be) late for the exam, they (pass).", options: ["aren't / will pass", "weren't / would pass", "hadn't been / would have passed"], correct: 2 },
@@ -386,50 +425,22 @@
             }
 
             // ==========================================
-            // ✉️ ENVÍO DE DATOS CON WEB3FORMS
+            // 💾 GUARDADO LOCAL EN EL NAVEGADOR
             // ==========================================
-            sendEmailReport(status) {
-                if (WEB3FORMS_KEY === "d9a9dc71-3f26-4f9f-8fc0-29a02d2fa0fe") {
-                    console.log("Web3Forms no configurado. Saltando envío.");
-                    const statusEl = document.getElementById('email-status-text');
-                    if (statusEl) statusEl.textContent = "⚠️ Reporte de correo no configurado.";
-                    return;
-                }
-
-                // Generamos un objeto FormData que Web3Forms pueda procesar automáticamente
-                const formData = new FormData();
-                formData.append("access_key", WEB3FORMS_KEY);
-                formData.append("subject", `Examen Inglés - Estudiante: ${this.studentName}`);
-                formData.append("from_name", "Cyberpunk Grammar System");
-                formData.append("Estudiante", this.studentName);
-                formData.append("Nota Final", `${this.score} / 30`);
-                formData.append("Estado de la Prueba", status);
-
-                fetch("https://api.web3forms.com/submit", {
-                    method: "POST",
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const statusEl = document.getElementById('email-status-text');
-                    if (data.success) {
-                        console.log("¡Reporte enviado con éxito!", data);
-                        if (statusEl) {
-                            statusEl.textContent = "✓ Reporte de notas enviado al correo del docente.";
-                            statusEl.className = "text-emerald-400 text-xs font-bold tracking-wider uppercase mb-4";
-                        }
-                    } else {
-                        throw new Error(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error("Error al enviar con Web3Forms:", error);
-                    const statusEl = document.getElementById('email-status-text');
-                    if (statusEl) {
-                        statusEl.textContent = "✗ Error al transmitir reporte.";
-                        statusEl.className = "text-red-400 text-xs font-bold tracking-wider uppercase mb-4";
-                    }
+            saveResultLocally(status) {
+                const results = JSON.parse(localStorage.getItem('quiz_results') || '[]');
+                
+                const fecha = new Date();
+                const fechaFormateada = `${fecha.toLocaleDateString()} - ${fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                
+                results.push({
+                    date: fechaFormateada,
+                    student: this.studentName || "Anónimo",
+                    score: `${this.score} / 30`,
+                    status: status
                 });
+
+                localStorage.setItem('quiz_results', JSON.stringify(results));
             }
 
             triggerCheatProtocol() {
@@ -441,8 +452,8 @@
                     document.exitFullscreen();
                 }
 
-                // Envía correo alertando de la trampa en segundo plano
-                this.sendEmailReport("🔴 EXAMEN ANULADO (Intento de Copia)");
+                // Guardar novedad de trampa localmente
+                this.saveResultLocally("🚨 COPIA (Salió de Pantalla/Pestaña)");
 
                 document.getElementById('quiz-screen').classList.add('hidden');
                 document.getElementById('start-screen').classList.add('hidden');
@@ -460,8 +471,8 @@
                     document.exitFullscreen();
                 }
 
-                // Envía el correo con la calificación final en segundo plano
-                this.sendEmailReport("🟢 COMPLETADO SATISFACTORIAMENTE");
+                // Guardar resultado normal localmente
+                this.saveResultLocally("🟢 COMPLETADO NORMALMENTE");
 
                 document.getElementById('quiz-screen').classList.add('hidden');
                 document.getElementById('results-screen').classList.remove('hidden');
@@ -486,19 +497,86 @@
                 document.getElementById('quiz-screen').classList.add('hidden');
                 document.getElementById('results-screen').classList.add('hidden');
                 document.getElementById('cheat-screen').classList.add('hidden');
+                document.getElementById('teacher-panel').classList.add('hidden');
                 document.getElementById('blocked-screen').classList.remove('hidden');
                 this.isQuizActive = false;
             }
 
-            unlock() {
+            // ==========================================
+            // 🛡️ ACCESO DOCENTE Y SISTEMA DE PIN (2018)
+            // ==========================================
+            promptTeacherAccess() {
+                // Lleva al docente a la pantalla de PIN para ingresar
+                this.showBlockScreen();
+            }
+
+            unlock(action) {
                 const pin = document.getElementById('unlock-pin').value;
                 if (pin === "2018") {
-                    localStorage.removeItem('quiz_blocked');
-                    location.reload();
+                    document.getElementById('unlock-error').classList.add('hidden');
+                    document.getElementById('unlock-pin').value = ""; // Limpiar pin
+                    
+                    if (action === 'history') {
+                        this.openTeacherPanel();
+                    } else if (action === 'reset') {
+                        localStorage.removeItem('quiz_blocked');
+                        location.reload();
+                    }
                 } else {
                     const err = document.getElementById('unlock-error');
                     err.classList.remove('hidden');
                     setTimeout(() => err.classList.add('hidden'), 3000);
+                }
+            }
+
+            openTeacherPanel() {
+                document.getElementById('blocked-screen').classList.add('hidden');
+                document.getElementById('start-screen').classList.add('hidden');
+                document.getElementById('teacher-panel').classList.remove('hidden');
+
+                const tableBody = document.getElementById('teacher-table-body');
+                tableBody.innerHTML = '';
+
+                const results = JSON.parse(localStorage.getItem('quiz_results') || '[]');
+
+                if (results.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="p-8 text-center text-gray-500 italic">No hay registros guardados en este dispositivo.</td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                results.reverse().forEach(res => {
+                    const statusClass = res.status.includes('🚨') ? 'text-red-400 font-bold' : 'text-emerald-400 font-semibold';
+                    
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-purple-950/10 transition-colors';
+                    row.innerHTML = `
+                        <td class="p-4 text-xs text-gray-500 font-mono">${res.date}</td>
+                        <td class="p-4 font-bold text-gray-200 uppercase">${res.student}</td>
+                        <td class="p-4 text-white font-mono font-bold">${res.score}</td>
+                        <td class="p-4 text-xs ${statusClass}">${res.status}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            closeTeacherPanel() {
+                document.getElementById('teacher-panel').classList.add('hidden');
+                // Si el sistema estaba bloqueado, lo regresa a la pantalla de bloqueo. Si no, al inicio.
+                if (localStorage.getItem('quiz_blocked') === 'true') {
+                    document.getElementById('blocked-screen').classList.remove('hidden');
+                } else {
+                    document.getElementById('start-screen').classList.remove('hidden');
+                }
+            }
+
+            clearHistory() {
+                if (confirm("⚠️ ¿Estás seguro de que deseas borrar TODOS los registros de estudiantes guardados en esta computadora? Esta acción no se puede deshacer.")) {
+                    localStorage.removeItem('quiz_results');
+                    this.openTeacherPanel(); // Recargar tabla vacía
                 }
             }
         }
