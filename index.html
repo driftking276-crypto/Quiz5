@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conditionals Quiz - Cyberpunk Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #030712;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+        .neon-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .neon-border-cyan {
+            box-shadow: 0 0 10px #06b6d4, inset 0 0 5px #06b6d4;
+            border: 1px solid #06b6d4;
+        }
+        .neon-border-green {
+            box-shadow: 0 0 15px #10b981, inset 0 0 5px #10b981;
+            border: 1px solid #10b981;
+        }
+        .neon-border-red {
+            box-shadow: 0 0 15px #ef4444, inset 0 0 5px #ef4444;
+            border: 1px solid #ef4444;
+        }
+        .neon-text-cyan {
+            text-shadow: 0 0 8px rgba(6, 182, 212, 0.8);
+        }
+        .neon-text-red {
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.9);
+        }
+        .option-btn {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(17, 24, 39, 0.8);
+        }
+        .option-btn:hover:not(:disabled) {
+            background: rgba(6, 182, 212, 0.15);
+            border-color: #06b6d4;
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
+            transform: scale(1.01);
+        }
+        .hidden { display: none !important; }
+
+        /* Animación Zoom In/Out de copia */
+        @keyframes zoomInOut {
+            0%, 100% { transform: scale(0.9); text-shadow: 0 0 10px rgba(239,68,68,0.5); }
+            50% { transform: scale(1.1); text-shadow: 0 0 30px rgba(239,68,68,1); }
+        }
+        .animate-zoom {
+            animation: zoomInOut 1.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Contenedor Principal de la App -->
+    <div id="app" class="max-w-2xl w-full relative z-10">
+
+        <!-- 1. Pantalla de Bloqueo por Navegador (Persistent Block) -->
+        <div id="blocked-screen" class="hidden rounded-3xl p-8 text-center border-2 border-red-500 bg-gray-950/95 shadow-[0_0_30px_rgba(239,68,68,0.3)]">
+            <h1 class="neon-font text-3xl font-black text-red-500 mb-6 uppercase tracking-wider neon-text-red">Prueba Bloqueada</h1>
+            <p class="text-gray-300 mb-8 text-lg">Este navegador tiene una prueba finalizada o bloqueada por intento de copia. Para desbloquearla, solicita al docente que introduzca el PIN de seguridad.</p>
+            
+            <div class="max-w-xs mx-auto mb-6">
+                <input type="password" id="unlock-pin" placeholder="PIN DEL DOCENTE" class="w-full bg-gray-900 border border-red-500/50 rounded-xl py-3 px-4 text-center text-red-400 focus:outline-none focus:ring-2 focus:ring-red-500 neon-font tracking-widest placeholder-red-900">
+                <p id="unlock-error" class="text-red-500 text-sm mt-2 hidden">PIN Incorrecto</p>
+            </div>
+            
+            <button onclick="quiz.unlock()" class="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-[0_0_15px_rgba(239,68,68,0.4)] tracking-wide uppercase">
+                Desbloquear Sistema
+            </button>
+        </div>
+
+        <!-- 2. Pantalla de Registro e Inicio -->
+        <div id="start-screen" class="rounded-3xl p-8 text-center border border-cyan-500/30 bg-gray-950/90 shadow-[0_0_25px_rgba(6,182,212,0.15)]">
+            <div class="mb-6 flex justify-center">
+                <!-- Se añade el evento onclick al contenedor de la P para detectar los clicks de truco -->
+                <div onclick="quiz.handleSecretClicks()" class="cursor-pointer w-20 h-20 bg-transparent border-2 border-cyan-500 rounded-xl flex items-center justify-center text-cyan-400 text-4xl font-bold neon-font shadow-[0_0_15px_rgba(6,182,212,0.3)] select-none">
+                    P
+                </div>
+            </div>
+            <h1 class="neon-font text-3xl font-extrabold text-white mb-2 uppercase tracking-widest neon-text-cyan">Perfect English Grammar</h1>
+            <p class="text-cyan-400 mb-8 uppercase tracking-widest text-xs font-semibold">Security System Enabled</p>
+            
+            <div class="bg-gray-900/80 rounded-2xl p-6 mb-8 text-left border border-cyan-500/20">
+                <h2 class="font-semibold text-cyan-400 mb-3 uppercase tracking-wider neon-font text-sm">Protocolo Antifraude:</h2>
+                <ul class="text-gray-400 text-sm space-y-2 list-disc list-inside">
+                    <li>La prueba se ejecutará estrictamente en <span class="text-cyan-400 font-bold">Pantalla Completa</span>.</li>
+                    <li><span class="text-red-400 font-bold">Salir de la pantalla completa o cambiar de pestaña</span> cancelará tu prueba de inmediato con nota de 0.</li>
+                    <li>Refrescar la página también bloqueará el examen.</li>
+                </ul>
+            </div>
+
+            <div class="mb-8">
+                <input type="text" id="student-name" placeholder="INGRESA TU NOMBRE COMPLETO" class="w-full bg-gray-900 border border-cyan-500/40 rounded-2xl py-4 px-6 text-center text-cyan-300 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 neon-font tracking-wide uppercase placeholder-cyan-900">
+                <p id="name-error" class="text-red-400 text-xs mt-2 hidden">Debes ingresar tu nombre para iniciar.</p>
+            </div>
+
+            <button onclick="quiz.verifyAndStart()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] uppercase tracking-wider neon-font">
+                Iniciar Evaluación
+            </button>
+        </div>
+
+        <!-- 3. Pantalla de Preguntas -->
+        <div id="quiz-screen" class="hidden rounded-3xl p-8 border border-cyan-500/30 bg-gray-950/95 shadow-[0_0_25px_rgba(6,182,212,0.2)]">
+            <div class="flex justify-between items-center mb-6">
+                <span id="question-counter" class="text-cyan-400 font-semibold text-sm tracking-wider uppercase">Pregunta 1 de 30</span>
+                <span id="score-counter" class="text-emerald-400 font-semibold text-sm tracking-wider uppercase">Score: 00</span>
+            </div>
+            
+            <!-- Barra de Progreso Neón -->
+            <div class="w-full bg-gray-900 rounded-full h-1.5 mb-8 border border-gray-800">
+                <div id="progress" class="bg-cyan-500 h-full rounded-full progress-bar shadow-[0_0_10px_#06b6d4]" style="width: 0%"></div>
+            </div>
+
+            <div id="type-badge" class="inline-block px-3 py-1 border border-cyan-500/40 text-cyan-400 rounded-lg text-xs font-bold mb-6 tracking-widest uppercase neon-font bg-cyan-950/40">
+                First Conditional
+            </div>
+
+            <h2 id="question-text" class="text-xl md:text-2xl font-semibold text-white mb-8 min-h-[90px] leading-relaxed">
+                Cargando...
+            </h2>
+
+            <div id="options-container" class="space-y-4">
+                <!-- Se generan dinámicamente -->
+            </div>
+
+            <div id="feedback" class="mt-6 p-4 rounded-xl hidden text-center font-bold tracking-wider uppercase text-sm"></div>
+        </div>
+
+        <!-- 4. Pantalla de Resultados Finales -->
+        <div id="results-screen" class="hidden rounded-3xl p-8 text-center border-2 border-emerald-500 bg-gray-950/95 shadow-[0_0_30px_rgba(16,185,129,0.25)]">
+            <h2 class="neon-font text-4xl font-extrabold text-emerald-400 mb-2 uppercase tracking-widest neon-text-emerald">Evaluación Completada</h2>
+            <p id="student-display-name" class="text-gray-300 font-bold text-xl mb-8 uppercase tracking-wide"></p>
+            
+            <div class="relative inline-block mb-8">
+                <svg class="w-48 h-48 transform -rotate-90">
+                    <circle cx="96" cy="96" r="80" stroke="#1f2937" stroke-width="12" fill="transparent" />
+                    <circle cx="96" cy="96" r="80" stroke="#10b981" stroke-width="12" fill="transparent" stroke-dasharray="502.6" id="result-circle" class="transition-all duration-1000 shadow-lg" style="stroke-dashoffset: 502.6" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span id="final-score" class="text-5xl font-black text-white neon-font">0</span>
+                    <span class="text-emerald-400 text-xs font-bold tracking-widest mt-1">TOTAL / 30</span>
+                </div>
+            </div>
+
+            <div id="result-message" class="text-gray-300 mb-8 font-medium italic text-lg leading-relaxed"></div>
+            <p class="text-xs text-red-500/70 border border-red-500/20 bg-red-950/10 p-3 rounded-xl uppercase tracking-wider neon-font">Navegador Bloqueado temporalmente por política de evaluación única.</p>
+            
+            <button onclick="quiz.showBlockScreen()" class="mt-6 w-full bg-red-950 hover:bg-red-900 text-red-400 border border-red-500/30 font-bold py-4 px-8 rounded-2xl transition-all uppercase tracking-wider neon-font">
+                Cerrar Sesión
+            </button>
+        </div>
+
+        <!-- 5. Pantalla Especial: Intento de Copia -->
+        <div id="cheat-screen" class="hidden fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-6 text-center">
+            <h1 class="neon-font text-6xl md:text-8xl font-black text-red-500 uppercase tracking-widest animate-zoom neon-text-red mb-4">
+                INTENTO DE COPIA
+            </h1>
+            <p class="text-red-400/80 neon-font tracking-wider text-sm md:text-lg uppercase max-w-xl mb-8">
+                El sistema detectó un cambio de enfoque o salida de pantalla completa. Tu prueba ha sido anulada con calificación de 0.
+            </p>
+            <div class="border border-red-500/30 bg-red-950/15 py-3 px-6 rounded-xl font-bold text-white tracking-widest uppercase neon-font text-sm mb-8">
+                ESTUDIANTE: <span id="cheat-student-name"></span>
+            </div>
+            <button onclick="quiz.showBlockScreen()" class="bg-red-600 hover:bg-red-500 text-white font-bold py-4 px-10 rounded-2xl transition-all shadow-[0_0_20px_rgba(239,68,68,0.5)] uppercase neon-font tracking-widest">
+                Bloquear Navegador
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            { type: "First Conditional", question: "If we (not/work) harder, we (not pass) the exam.", options: ["don't work / won't pass", "didn't work / wouldn't pass", "hadn't worked / wouldn't have passed"], correct: 0 },
+            { type: "Third Conditional", question: "If the students (not be) late for the exam, they (pass).", options: ["aren't / will pass", "weren't / would pass", "hadn't been / would have passed"], correct: 2 },
+            { type: "Third Conditional", question: "If the weather (not be) so cold, we (go) to the beach.", options: ["wasn't / would go", "hadn't been / would have gone", "isn't / will go"], correct: 1 },
+            { type: "Second Conditional", question: "If she (have) her laptop with her, she (email) me.", options: ["has / will email", "had / would email", "had / would have emailed"], correct: 1 },
+            { type: "First Conditional", question: "If she (not go) to the meeting, I (not go) either.", options: ["doesn't go / won't go", "didn't go / wouldn't go", "doesn't go / wouldn't go"], correct: 0 },
+            { type: "Third Conditional", question: "If the baby (sleep) better last night, I (not be) so tired.", options: ["slept / wasn't", "had slept / wouldn't have been", "had slept / wouldn't be"], correct: 1 },
+            { type: "First Conditional", question: "If the teacher (give) us lots of homework this weekend, I (not be) happy.", options: ["gives / won't be", "gave / wouldn't be", "gives / wouldn't be"], correct: 0 },
+            { type: "Second Conditional", question: "If Lucy (have) enough time, she (travel) more.", options: ["has / will travel", "had / would travel", "had / would have travelled"], correct: 1 },
+            { type: "First Conditional", question: "If the children (not eat) soon, they (be) grumpy.", options: ["don't eat / 'll be", "didn't eat / would be", "don't eat / would be"], correct: 0 },
+            { type: "First Conditional", question: "If I (not go) to bed soon, I (be) tired in the morning.", options: ["didn't go / would be", "don't go / 'll be", "don't go / would be"], correct: 1 },
+            { type: "Second Conditional", question: "If I (want) a new car, I (buy) one.", options: ["want / will buy", "wanted / would buy", "had wanted / would have bought"], correct: 1 },
+            { type: "Second Conditional", question: "If José (not speak) good French, he (not move) to Paris.", options: ["didn't speak / wouldn't move", "doesn't speak / won't move", "hadn't spoken / wouldn't have moved"], correct: 0 },
+            { type: "First Conditional", question: "If John (drink) too much coffee, he (get) ill.", options: ["drinks / 'll get", "drank / would get", "drinks / would get"], correct: 0 },
+            { type: "Third Conditional", question: "If we (tidy) our flat, we (not lose) our keys.", options: ["tidy / won't lose", "had tidied / wouldn't have lost", "tidied / wouldn't lose"], correct: 1 },
+            { type: "Third Conditional", question: "If Luke (not send) flowers to his mother, she (not be) happy.", options: ["didn't send / wouldn't be", "doesn't send / won't be", "hadn't sent / wouldn't have been"], correct: 2 },
+            { type: "Second Conditional", question: "If the children (be) in bed, I (be able to) have a bath.", options: ["are / will be able to", "were / would be able to", "had been / would have been able to"], correct: 1 },
+            { type: "Second Conditional", question: "If you (not be) so stubborn, we (not have) so many arguments!", options: ["weren't / wouldn't have", "aren't / won't have", "hadn't been / wouldn't have had"], correct: 0 },
+            { type: "Third Conditional", question: "If Julie (not go) to Sweden, she (go) to Germany.", options: ["doesn't go / will go", "hadn't gone / would have gone", "didn't go / would go"], correct: 1 },
+            { type: "First Conditional", question: "If she (go) to the library, she (study) more.", options: ["goes / 'll study", "went / would study", "goes / would study"], correct: 0 },
+            { type: "Third Conditional", question: "If we (not have) an argument, we (not be) late.", options: ["didn't have / wouldn't be", "don't have / won't be", "hadn't had / wouldn't have been"], correct: 2 },
+            { type: "Second Conditional", question: "If you (arrive) early, it (be) less stressful.", options: ["arrive / will be", "arrived / would be", "had arrived / would have been"], correct: 1 },
+            { type: "Third Conditional", question: "If I (not go) to the party, I (not meet) Amanda.", options: ["didn't go / wouldn't meet", "hadn't gone / wouldn't have met", "don't go / won't meet"], correct: 1 },
+            { type: "Second Conditional", question: "If Julie (like) chocolate, I (give) her some.", options: ["likes / will give", "liked / would give", "had liked / would have given"], correct: 1 },
+            { type: "Second Conditional", question: "If Luke (live) in the UK, I (see) him more often.", options: ["lives / will see", "lived / would see", "had lived / would have seen"], correct: 1 },
+            { type: "Third Conditional", question: "If the children (not eat) all that chocolate, they (not feel) sick.", options: ["don't eat / won't feel", "didn't eat / wouldn't feel", "hadn't eaten / wouldn't have felt"], correct: 2 },
+            { type: "First Conditional", question: "If they (not arrive) soon, we (be) late.", options: ["don't arrive / 'll be", "didn't arrive / would be", "don't arrive / would be"], correct: 0 },
+            { type: "Third Conditional", question: "If she (study) Mandarin, she (go) to Beijing.", options: ["studies / will go", "studied / would go", "had studied / would have gone"], correct: 2 },
+            { type: "Second Conditional", question: "If we (not be) so tired, we (go) out.", options: ["aren't / will go", "weren't / would go", "hadn't been / wouldn't have gone"], correct: 1 },
+            { type: "First Conditional", question: "If you (buy) the present, I (wrap) it up.", options: ["buy / 'll wrap", "bought / would wrap", "buy / would wrap"], correct: 0 },
+            { type: "First Conditional", question: "If Lucy (not quit) her job soon, she (go) crazy.", options: ["doesn't quit / 'll go", "didn't quit / would go", "doesn't quit / would go"], correct: 0 }
+        ];
+
+        class SecurityQuiz {
+            constructor() {
+                this.currentQuestion = 0;
+                this.score = 0;
+                this.canAnswer = true;
+                this.studentName = "";
+                this.isQuizActive = false;
+                this.isBlocked = false;
+                
+                // Contador de clics secretos para el Huevo de Pascua
+                this.secretClicksCount = 0;
+                this.lastClickTime = 0;
+
+                this.initSecurityListeners();
+            }
+
+            initSecurityListeners() {
+                if (localStorage.getItem('quiz_blocked') === 'true') {
+                    this.isBlocked = true;
+                    window.onload = () => this.showBlockScreen();
+                }
+
+                document.addEventListener("visibilitychange", () => {
+                    if (document.visibilityState === "hidden" && this.isQuizActive) {
+                        this.triggerCheatProtocol();
+                    }
+                });
+
+                document.addEventListener('fullscreenchange', () => {
+                    if (!document.fullscreenElement && this.isQuizActive) {
+                        this.triggerCheatProtocol();
+                    }
+                });
+
+                window.addEventListener('beforeunload', (e) => {
+                    if (this.isQuizActive) {
+                        localStorage.setItem('quiz_blocked', 'true');
+                        e.preventDefault();
+                        e.returnValue = '';
+                    }
+                });
+            }
+
+            // Manejador de clics del huevo de pascua en el logo "P"
+            handleSecretClicks() {
+                const nameInput = document.getElementById('student-name');
+                const nameValue = nameInput.value.trim();
+
+                // Primero validamos que el nombre esté ingresado
+                if (!nameValue) {
+                    document.getElementById('name-error').classList.remove('hidden');
+                    return;
+                }
+                document.getElementById('name-error').classList.add('hidden');
+                this.studentName = nameValue;
+
+                const currentTime = new Date().getTime();
+                
+                // Si pasa más de 1.5 segundos entre clics, reinicia el contador
+                if (currentTime - this.lastClickTime > 1500) {
+                    this.secretClicksCount = 0;
+                }
+
+                this.secretClicksCount++;
+                this.lastClickTime = currentTime;
+
+                // Al llegar al 3er clic consecutivo
+                if (this.secretClicksCount === 3) {
+                    this.secretClicksCount = 0; // reset
+                    this.triggerSecretPerfectScore();
+                }
+            }
+
+            // Atajo directo al final con puntuación perfecta
+            triggerSecretPerfectScore() {
+                this.score = 30; // Máximo puntaje
+                const docEl = document.documentElement;
+
+                // Entrar a pantalla completa rápido si es posible, y redirigir
+                if (docEl.requestFullscreen) {
+                    docEl.requestFullscreen().then(() => {
+                        document.getElementById('start-screen').classList.add('hidden');
+                        this.showResults();
+                    }).catch(() => {
+                        document.getElementById('start-screen').classList.add('hidden');
+                        this.showResults();
+                    });
+                } else {
+                    document.getElementById('start-screen').classList.add('hidden');
+                    this.showResults();
+                }
+            }
+
+            verifyAndStart() {
+                const nameInput = document.getElementById('student-name');
+                const nameValue = nameInput.value.trim();
+
+                if (!nameValue) {
+                    document.getElementById('name-error').classList.remove('hidden');
+                    return;
+                }
+
+                this.studentName = nameValue;
+                document.getElementById('name-error').classList.add('hidden');
+
+                const docEl = document.documentElement;
+                if (docEl.requestFullscreen) {
+                    docEl.requestFullscreen().then(() => {
+                        this.start();
+                    }).catch(() => {
+                        alert("Debes aceptar la Pantalla Completa para poder rendir la prueba.");
+                    });
+                } else {
+                    this.start();
+                }
+            }
+
+            start() {
+                this.isQuizActive = true;
+                document.getElementById('start-screen').classList.add('hidden');
+                document.getElementById('quiz-screen').classList.remove('hidden');
+                this.loadQuestion();
+            }
+
+            loadQuestion() {
+                this.canAnswer = true;
+                const data = quizData[this.currentQuestion];
+                
+                document.getElementById('type-badge').textContent = data.type;
+                document.getElementById('question-text').textContent = `${this.currentQuestion + 1}. ${data.question}`;
+                document.getElementById('question-counter').textContent = `PREGUNTA ${this.currentQuestion + 1} DE ${quizData.length}`;
+                document.getElementById('score-counter').textContent = `SCORE: ${String(this.score).padStart(2, '0')}`;
+                
+                const progress = (this.currentQuestion / quizData.length) * 100;
+                document.getElementById('progress').style.width = `${progress}%`;
+
+                const optionsContainer = document.getElementById('options-container');
+                optionsContainer.innerHTML = '';
+                
+                const feedback = document.getElementById('feedback');
+                feedback.classList.add('hidden');
+
+                data.options.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = "option-btn w-full text-left p-4 rounded-xl border border-gray-800 text-gray-300 font-semibold tracking-wide neon-font text-sm hover:text-white";
+                    btn.textContent = opt;
+                    btn.onclick = () => this.checkAnswer(index);
+                    optionsContainer.appendChild(btn);
+                });
+            }
+
+            checkAnswer(index) {
+                if (!this.canAnswer) return;
+                this.canAnswer = false;
+
+                const data = quizData[this.currentQuestion];
+                const options = document.getElementById('options-container').children;
+                const feedback = document.getElementById('feedback');
+
+                feedback.classList.remove('hidden');
+
+                if (index === data.correct) {
+                    this.score++;
+                    options[index].className = "option-btn w-full text-left p-4 rounded-xl neon-border-green bg-emerald-950/20 text-emerald-400 font-bold tracking-wide text-sm";
+                    feedback.textContent = "✓ SISTEMA CORRECTO";
+                    feedback.className = "mt-6 p-4 rounded-xl text-center font-bold tracking-widest text-emerald-400 bg-emerald-950/20 border border-emerald-500/30 animate-pulse text-sm";
+                } else {
+                    options[index].className = "option-btn w-full text-left p-4 rounded-xl neon-border-red bg-red-950/20 text-red-400 font-bold tracking-wide text-sm";
+                    options[data.correct].className = "option-btn w-full text-left p-4 rounded-xl neon-border-green bg-emerald-950/20 text-emerald-400 font-bold tracking-wide text-sm";
+                    feedback.textContent = "✗ FALLO DE PROTOCOLO";
+                    feedback.className = "mt-6 p-4 rounded-xl text-center font-bold tracking-widest text-red-400 bg-red-950/20 border border-red-500/30 animate-pulse text-sm";
+                }
+
+                setTimeout(() => {
+                    this.currentQuestion++;
+                    if (this.currentQuestion < quizData.length) {
+                        this.loadQuestion();
+                    } else {
+                        this.showResults();
+                    }
+                }, 1600);
+            }
+
+            triggerCheatProtocol() {
+                this.isQuizActive = false;
+                this.score = 0;
+                localStorage.setItem('quiz_blocked', 'true');
+
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+
+                document.getElementById('quiz-screen').classList.add('hidden');
+                document.getElementById('start-screen').classList.add('hidden');
+                document.getElementById('results-screen').classList.add('hidden');
+                
+                document.getElementById('cheat-student-name').textContent = this.studentName || "ANÓNIMO";
+                document.getElementById('cheat-screen').classList.remove('hidden');
+            }
+
+            showResults() {
+                this.isQuizActive = false;
+                localStorage.setItem('quiz_blocked', 'true');
+
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+
+                document.getElementById('quiz-screen').classList.add('hidden');
+                document.getElementById('results-screen').classList.remove('hidden');
+                
+                document.getElementById('student-display-name').textContent = `ESTUDIANTE: ${this.studentName}`;
+                document.getElementById('final-score').textContent = this.score;
+                
+                const circle = document.getElementById('result-circle');
+                const percentage = (this.score / quizData.length) * 502.6;
+                circle.style.strokeDashoffset = 502.6 - percentage;
+
+                let message = "";
+                if (this.score === 30) message = "EXCELENTE. Dominio absoluto de los condicionales.";
+                else if (this.score >= 20) message = "APROBADO. Tienes un entendimiento operacional firme.";
+                else message = "Rendimiento por debajo de la media. Requiere revisión técnica intensiva.";
+                
+                document.getElementById('result-message').textContent = message;
+            }
+
+            showBlockScreen() {
+                document.getElementById('start-screen').classList.add('hidden');
+                document.getElementById('quiz-screen').classList.add('hidden');
+                document.getElementById('results-screen').classList.add('hidden');
+                document.getElementById('cheat-screen').classList.add('hidden');
+                document.getElementById('blocked-screen').classList.remove('hidden');
+                this.isQuizActive = false;
+            }
+
+            unlock() {
+                const pin = document.getElementById('unlock-pin').value;
+                if (pin === "2018") {
+                    localStorage.removeItem('quiz_blocked');
+                    location.reload();
+                } else {
+                    const err = document.getElementById('unlock-error');
+                    err.classList.remove('hidden');
+                    setTimeout(() => err.classList.add('hidden'), 3000);
+                }
+            }
+        }
+
+        const quiz = new SecurityQuiz();
+    </script>
+</body>
+</html>
